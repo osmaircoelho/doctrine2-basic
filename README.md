@@ -1,4 +1,4 @@
-# doctrine2-basic
+# Doctrine2 Basic
 ORM - PHP Doctrine
 
 # Welcome to Doctrine Project
