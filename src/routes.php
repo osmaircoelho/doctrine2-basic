@@ -10,9 +10,15 @@ $request = \Zend\Diactoros\ServerRequestFactory::fromGlobals(
 $routerContainer = new RouterContainer();
 
 $map = $routerContainer->getMap();
-$map->get('home', '/', function ($request, $response){
-    $response->getBody()->write("Olá esta tudo funcionando agora");
-    return $response;
+
+$view = new \Slim\Views\PhpRenderer(__DIR__.'/../templates/');
+
+// Anonymous function
+$map->get('home', '/', function ($request, $response) use ($view){ // 'use' Has access to the context of the external variable.
+
+    return $view->render($response, 'home.phtml', [
+        'test' => 'Slim PHP esta funcionando normalmente'
+    ]);
 });
 $matcher = $routerContainer->getMatcher();
 $router = $matcher->match($request);
