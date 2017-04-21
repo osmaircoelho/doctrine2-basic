@@ -1,0 +1,28 @@
+<?php include_once __DIR__ . '/../header.html'; ?>
+    <div class="container">
+        <div class="row">
+            <h3>Category list</h3>
+            <a href="/categories/create" class="btn btn-primary btn-mg active"
+               role="button" aria-pressed="true">New category</a>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($categories as $category):?>
+                        <tr>
+                            <td><?php echo $category->getId(); ?></td>
+                            <td><?php echo $category->getName(); ?></td>
+                            <td><?php echo "<a  class='btn btn-primary btn-sm active'
+                                                href='/categories/{$category->getId()}/edit'>Edit</a>"; ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<?php include_once __DIR__ . '/../footer.html'; ?>

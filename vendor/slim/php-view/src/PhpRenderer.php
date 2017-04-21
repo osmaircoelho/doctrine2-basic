@@ -60,7 +60,6 @@ class PhpRenderer
     public function render(ResponseInterface $response, $template, array $data = [])
     {
         $output = $this->fetch($template, $data);
-
         $response->getBody()->write($output);
         
         return $response;
