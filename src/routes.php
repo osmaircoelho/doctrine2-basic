@@ -1,5 +1,6 @@
 <?php
 use App\Entity\Category;
+use App\Entity\Post;
 use Aura\Router\RouterContainer;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
@@ -15,71 +16,43 @@ $map = $routerContainer->getMap();
 
 $view = new \Slim\Views\PhpRenderer(__DIR__.'/../templates/');
 $entityManager = getEntityManager();
-// Anonymous function
-$map->get('home', '/', function ($request, $response) use ($view){ // 'use' Has access to the context of the external variable.
+
+$map->get('home', '/', function(ServerRequestInterface $request, $response) use ($view, $entityManager){
+    $postsRepository = $entityManager->getRepository(Post::class);
+    $categoryRepository = $entityManager->getRepository(Category::class);
+    $post = $postsRepository->findAll();
+    $categories = $categoryRepository->findAll();
+    $data = $request->getQueryParams();
+
+    if( isset($data['search']) and $data['search'] != "" ){
+        $queryBuilder = $postsRepository->createQueryBuilder('p');
+        $queryBuilder->join('p.categories','c')
+            ->where($queryBuilder->expr()->eq('c.id', $data['search']));
+        $post = $queryBuilder->getQuery()->getResult();
+    }else{
+        $post = $postsRepository->findAll();
+    }
     return $view->render($response, 'home.phtml', [
-        'test' => 'Slim PHP esta funcionando normalmente'
+        'posts' => $post,
+        'categories' =>$categories
     ]);
 });
 
-$map->get('categories.create', '/categories/create', function($request, $response) use ($view){
-    return $view->render($response, 'categories/create.phtml');
-});
-
-$map->post('categories.store', '/categories/store',
-    function(ServerRequestInterface $request, $response) use ($view, $entityManager, $generator){
-        $data = $request->getParsedBody();
-        $category = new Category();
-        $category->SetName($data['name']);
-        $entityManager->persist($category);
-        $entityManager->flush();
-        $uri = $generator->generate('categories.list');
-        return new Response\RedirectResponse($uri);
-});
-
-$map->get('categories.list', '/categories', function ($request, $response) use ($view, $entityManager){
-    $repository = $entityManager->getRepository(Category::class);
-    $categories = $repository->findAll();
-    return $view->render($response, 'categories/list.phtml', [
-        'categories' => $categories
-    ]);
-});
-
-$map->get('categories.edit', '/categories/{id}/edit',
-    function(ServerRequestInterface $request, $response) use ($view, $entityManager){
-        $id = $request->getAttribute('id');
-        $repository = $entityManager->getRepository(Category::class);
-        $category = $repository->find($id);
-        return $view->render($response, 'categories/edit.phtml',
-            [
-                'category' => $category
-            ]);
-});
-
-$map->post('categories.update', '/categories/{id}/update',
-    function(ServerRequestInterface $request, $response) use ($view, $entityManager, $generator){
-        $id = $request->getAttribute('id');
-        $repository = $entityManager->getRepository(Category::class);
-        $category = $repository->find($id);
-        $data = $request->getParsedBody();
-        $category->SetName($data['name']);
-        $entityManager->flush();
-        $uri = $generator->generate('categories.list');
-        return new Response\RedirectResponse($uri);
-    });
+require_once __DIR__ . '/categories.php';
+require_once __DIR__ . '/posts.php';
 
 $matcher = $routerContainer->getMatcher();
 $router = $matcher->match($request);
 
-foreach ($router->attributes as $key => $value){
+foreach ($router->attributes as $key => $value) {
     $request = $request->withAttribute($key, $value);
 }
 $callable = $router->handler;
 
 /** @var Response $response */
 $response = $callable($request, new Response());
-if ($response instanceof Response\RedirectResponse){
+if ($response instanceof Response\RedirectResponse) {
     header("location:{$response->getHeader("location")[0]}");
-}elseif ($response instanceof Response) {
+} elseif ($response instanceof Response) {
     echo $response->getBody();
 }

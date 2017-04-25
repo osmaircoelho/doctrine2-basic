@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row">
             <h3>Category list</h3>
-            <a href="/categories/create" class="btn btn-primary btn-mg active"
+            <a href="/categories/create" class="btn btn-primary btn-mg"
                role="button" aria-pressed="true">New category</a>
             <table class="table">
                 <thead>
@@ -17,8 +17,11 @@
                         <tr>
                             <td><?php echo $category->getId(); ?></td>
                             <td><?php echo $category->getName(); ?></td>
-                            <td><?php echo "<a  class='btn btn-primary btn-sm active'
-                                                href='/categories/{$category->getId()}/edit'>Edit</a>"; ?></td>
+                            <td><?php echo "<a  class='btn btn-primary btn-xs'
+                                                href='/categories/{$category->getId()}/edit'>Edit</a>"; ?>
+                                <?php echo "<a  class='btn btn-danger btn-xs'
+                                                href='/categories/{$category->getId()}/remove'>Delete</a>"; ?>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
